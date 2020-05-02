@@ -2,7 +2,6 @@
 
 /*
 todo:
-	moduswechsel: grid-wall durchlässig oder fest
 	feld in eigene komponente, parameter dadrunter
 	audio-funktionalität / schnittstelle bauen
 */
@@ -46,7 +45,7 @@ namespace HDL {
 			for (auto x = 0; x < blocks; ++x)
 				for (auto y = 0; y < blocks; ++y)
 					if (cells[x][y] == Cell::Alive)
-						g.fillRect(grid.getRect(float(x), float(y), 1.f, 1.f).reduced(2.f));
+						g.fillRect(grid.getRect(x, y, 1, 1).reduced(2));
 		}
 
 		void onClick(const MouseEvent& evt) {
@@ -65,10 +64,8 @@ namespace HDL {
 
 		void onUpdate() {
 			for(auto x = 0; x < blocks; ++x)
-				for (auto y = 0; y < blocks; ++y) {
-					const auto neighborsCount = getAliveNeighborsCount(x, y);
-					applyRules(x, y, neighborsCount);
-				}
+				for (auto y = 0; y < blocks; ++y)
+					applyRules(x, y, getAliveNeighborsCount(x, y));
 			cells = cellsT;
 		}
 
@@ -90,6 +87,8 @@ namespace HDL {
 			switch (topology) {
 			case Topology::Normal:
 				for (auto& n : neighbors) {
+					if (count == 4)
+						break;
 					auto xx = n.getX() + x;
 					auto yy = n.getY() + y;
 					if (inRange(xx) && inRange(yy))
@@ -99,6 +98,8 @@ namespace HDL {
 				break;
 			case Topology::Torus:
 				for (auto& n : neighbors) {
+					if (count == 4)
+						break;
 					auto xx = n.getX() + x;
 					auto yy = n.getY() + y;
 					if (xx < 0)
@@ -111,7 +112,7 @@ namespace HDL {
 						yy -= blocks;
 					
 					if (cells[xx][yy] == Cell::Alive)
-							++count;
+						++count;
 				}
 				break;
 			}
